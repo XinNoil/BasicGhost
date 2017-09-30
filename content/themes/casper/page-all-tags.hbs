@@ -1,0 +1,89 @@
+{{!< default}}
+{{!-- The tag above means: insert everything in this file
+into the {body} of the default.hbs template --}}
+
+{{!-- The big featured header, it uses blog cover image as a BG if available --}}
+<header class="site-header outer">
+    <div class="inner">
+        {{> "site-nav"}}
+    </div>
+</header>
+
+{{!-- Everything inside the #post tags pulls data from the post --}}
+{{#post}}
+
+<main id="site-main" class="site-main outer" role="main">
+    <div class="inner">
+
+        <article class="post-full {{post_class}} {{#unless feature_image}}no-image{{/unless}}">
+
+            <header class="post-full-header">
+                <h1 class="post-full-title">{{title}}</h1>
+            </header>
+
+            {{#if feature_image}}
+            <figure class="post-full-image" style="background-image: url({{feature_image}})">
+            </figure>
+            {{/if}}
+
+            <section class="post-full-content">
+                {{content}}
+                <div id="tag-category">
+                    <ul class="category-list"></ul>
+                </div>
+            </section>
+
+        </article>
+
+    </div>
+</main>
+
+{{/post}}
+
+{{!-- The #contentFor helper here will send everything inside it up to the matching #block helper found in default.hbs --}}
+{{#contentFor "scripts"}}
+<script>
+$(function() {
+    var $postContent = $(".post-full-content");
+    $postContent.fitVids();
+});
+</script>
+{{/contentFor}}
+<script src="/assets/js/jquery.min.js"></script>
+<script src="/assets/js/moment.min.js"></script>
+<script type = "text/javascript"> 
+jQuery(document).ready(function () {
+    PopulateMenuTags();
+    PopulateTagPageTags();
+});
+
+function PopulateMenuTags() {
+    $.get(
+        ghost.url.api('tags', {
+            limit: 'all',
+            include: 'count.posts',
+            order: 'count.posts DESC'
+        })
+    ).done(function (data) {
+        $(data.tags).each(function(index,item) {
+            if(item.count.posts) {
+                $('.category-list').append('<li class="category-list-item"><a class="category-list-link" href="/tag/'+ item.name +'">'+ item.name +' (' + item.count.posts + ')'  +'</a></li>');
+            }
+        });
+    });
+}
+
+function PopulateTagPageTags() {
+    $.get(
+        ghost.url.api('tags', {
+            limit: 'all',
+            include: 'count.posts',
+            order: 'count.posts DESC'
+        })
+    ).done(function (data) {
+        $(data.tags).each(function(index,item) {
+            $('.tagpage-list').append('<li class="tagpagelist-item"><span class="badge">'+ item.count.posts +'</span><a href="/tag/'+ item.slug +'">'+ item.name +'</a></li>');
+        });
+    });
+}
+</script>
